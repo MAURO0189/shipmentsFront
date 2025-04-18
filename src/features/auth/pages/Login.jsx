@@ -1,18 +1,54 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Mail, Lock, User, ArrowRight } from "lucide-react";
 import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
+import ErrorSigningModal from "../../../components/ErrorSigningModal";
+import SuccessSingInModal from "../../../components/SuccessSingInModal";
 
+const backURL = import.meta.env.VITE_BACKEND_URL;
 const Login = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
+  const [errorModalIsOpen, setErrorModalIsOpen] = useState(false);
+  const [successModalIsOpen, setSuccessModalIsOpen] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Aquí iría la lógica de autenticación
-    console.log("Login attempt:", { email, password, rememberMe });
+    try {
+      const response = await fetch(`${backURL}/api/user/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.data?.token || !data.data?.user?.email) {
+        setErrorModalIsOpen(true);
+        return;
+      }
+
+      const token = data.data.token;
+      const userEmail = data.data.user.email;
+      const name = data.data.user.username;
+
+      sessionStorage.setItem("token", token);
+      sessionStorage.setItem("email", userEmail);
+      sessionStorage.setItem("name", name);
+      sessionStorage.setItem("role", "user");
+
+      setSuccessModalIsOpen(true);
+
+      navigate("/loading");
+    } catch (error) {
+      console.error("Error al enviar la solicitud:", error);
+      setErrorModalIsOpen(true);
+    }
   };
 
   return (
@@ -82,22 +118,6 @@ const Login = () => {
                       required
                     />
                   </div>
-                </div>
-
-                <div className="flex items-center mb-6">
-                  <input
-                    id="remember-me"
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={() => setRememberMe(!rememberMe)}
-                    className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <label
-                    htmlFor="remember-me"
-                    className="ml-2 block text-sm text-gray-700"
-                  >
-                    Mantener sesión iniciada
-                  </label>
                 </div>
 
                 <button
@@ -182,6 +202,11 @@ const Login = () => {
               </div>
             </div>
           </div>
+          {/* Modales */}
+          <ErrorSigningModal {...{ errorModalIsOpen, setErrorModalIsOpen }} />
+          <SuccessSingInModal
+            {...{ successModalIsOpen, setSuccessModalIsOpen }}
+          />
         </div>
       </main>
       <Footer />

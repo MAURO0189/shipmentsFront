@@ -1,33 +1,88 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Mail, Lock, User, ArrowRight, Phone, CheckCircle } from "lucide-react";
 import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 
+const backURL = import.meta.env.VITE_BACKEND_URL;
 const Register = () => {
+  const navigate = useNavigate();
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: "",
+    username: "",
     lastName: "",
     email: "",
-    phone: "",
+    phoneNumber: "",
     password: "",
     confirmPassword: "",
-    acceptTerms: false,
-    receiveNews: false,
   });
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? checked : value,
-    });
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Aquí iría la lógica de registro
-    console.log("Registration data:", formData);
+    setIsSubmitting(true);
+    if (formData.password !== formData.confirmPassword) {
+      setMessage("Las contraseñas no coinciden");
+      setIsSubmitting(false);
+      return;
+    }
+    if (formData.password.length < 8) {
+      alert("La contraseña debe tener al menos 8 caracteres");
+      setIsSubmitting(false);
+      return;
+    }
+    try {
+      const response = await fetch(`${backURL}/api/user/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData), // Sin anidarlo en un objeto adicional
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage("Registro exitoso. ¡Ahora puedes iniciar sesión!");
+        setMessageType("success");
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
+      } else {
+        if (data.message) {
+          setMessage(data.message);
+        } else if (data.error) {
+          setMessage(data.error);
+        } else if (data.errors && Array.isArray(data.errors)) {
+          const firstError = data.errors[0];
+          if (firstError.errores) {
+            setMessage(firstError.errores[0]);
+          } else if (typeof firstError === "string") {
+            setMessage(firstError);
+          } else {
+            setMessage("Error en el formulario. Por favor revisa los datos.");
+            setMessageType("error");
+          }
+        } else {
+          setMessage("Hubo un problema con el registro.");
+        }
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setMessage("Hubo un problema al conectar con el servidor.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -49,7 +104,7 @@ const Register = () => {
                   {/* Nombre */}
                   <div>
                     <label
-                      htmlFor="firstName"
+                      htmlFor="username"
                       className="block text-sm font-medium text-gray-700 mb-1"
                     >
                       Nombre
@@ -59,8 +114,8 @@ const Register = () => {
                         <User className="h-5 w-5 text-gray-400" />
                       </div>
                       <input
-                        id="firstName"
-                        name="firstName"
+                        id="username"
+                        name="username"
                         type="text"
                         value={formData.firstName}
                         onChange={handleChange}
@@ -124,7 +179,7 @@ const Register = () => {
                   {/* Teléfono */}
                   <div>
                     <label
-                      htmlFor="phone"
+                      htmlFor="phoneNumber"
                       className="block text-sm font-medium text-gray-700 mb-1"
                     >
                       Teléfono
@@ -134,8 +189,8 @@ const Register = () => {
                         <Phone className="h-5 w-5 text-gray-400" />
                       </div>
                       <input
-                        id="phone"
-                        name="phone"
+                        id="phoneNumber"
+                        name="phoneNumber"
                         type="tel"
                         value={formData.phone}
                         onChange={handleChange}
@@ -199,131 +254,25 @@ const Register = () => {
                     </div>
                   </div>
                 </div>
-
-                {/* Tipo de Cuenta */}
-                <div className="mt-6">
-                  <p className="block text-sm font-medium text-gray-700 mb-2">
-                    Tipo de Cuenta
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="border border-gray-300 rounded-lg p-4 hover:border-blue-500 cursor-pointer">
-                      <input
-                        type="radio"
-                        id="personal"
-                        name="accountType"
-                        value="personal"
-                        className="hidden"
-                        defaultChecked
-                      />
-                      <label
-                        htmlFor="personal"
-                        className="flex items-start cursor-pointer"
-                      >
-                        <div className="h-5 w-5 rounded-full border border-gray-400 flex items-center justify-center mr-3">
-                          <div className="h-3 w-3 rounded-full bg-blue-600"></div>
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-800">Personal</p>
-                          <p className="text-sm text-gray-600">
-                            Para envíos particulares y ocasionales
-                          </p>
-                        </div>
-                      </label>
-                    </div>
-
-                    <div className="border border-gray-300 rounded-lg p-4 hover:border-blue-500 cursor-pointer">
-                      <input
-                        type="radio"
-                        id="business"
-                        name="accountType"
-                        value="business"
-                        className="hidden"
-                      />
-                      <label
-                        htmlFor="business"
-                        className="flex items-start cursor-pointer"
-                      >
-                        <div className="h-5 w-5 rounded-full border border-gray-400 flex items-center justify-center mr-3">
-                          <div className="h-3 w-3 rounded-full"></div>
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-800">Empresa</p>
-                          <p className="text-sm text-gray-600">
-                            Para negocios y envíos frecuentes
-                          </p>
-                        </div>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Términos y condiciones */}
-                <div className="mt-6">
-                  <div className="flex items-start">
-                    <div className="flex items-center h-5">
-                      <input
-                        id="acceptTerms"
-                        name="acceptTerms"
-                        type="checkbox"
-                        checked={formData.acceptTerms}
-                        onChange={handleChange}
-                        className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                        required
-                      />
-                    </div>
-                    <div className="ml-3 text-sm">
-                      <label htmlFor="acceptTerms" className="text-gray-700">
-                        Acepto los{" "}
-                        <Link
-                          to="/terminos"
-                          className="text-blue-600 hover:text-blue-800 font-medium"
-                        >
-                          Términos y Condiciones
-                        </Link>{" "}
-                        y la{" "}
-                        <Link
-                          to="/privacidad"
-                          className="text-blue-600 hover:text-blue-800 font-medium"
-                        >
-                          Política de Privacidad
-                        </Link>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Newsletter */}
-                <div className="mt-3">
-                  <div className="flex items-start">
-                    <div className="flex items-center h-5">
-                      <input
-                        id="receiveNews"
-                        name="receiveNews"
-                        type="checkbox"
-                        checked={formData.receiveNews}
-                        onChange={handleChange}
-                        className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                      />
-                    </div>
-                    <div className="ml-3 text-sm">
-                      <label htmlFor="receiveNews" className="text-gray-700">
-                        Me gustaría recibir ofertas especiales y novedades por
-                        correo electrónico
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
                 <div className="mt-8">
                   <button
                     type="submit"
                     className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center"
                   >
-                    Crear Cuenta
-                    <ArrowRight className="ml-2 h-5 w-5" />
+                    {isSubmitting ? "Registrando..." : "Registrarse"}
+                    <ArrowRight className="w-5 h-5" />
                   </button>
                 </div>
               </form>
+              {message && (
+                <p
+                  className={`mt-4 text-sm text-center ${
+                    messageType === "error" ? "text-red-500" : "text-green-600"
+                  }`}
+                >
+                  {message}
+                </p>
+              )}
 
               <div className="mt-6 text-center">
                 <p className="text-sm text-gray-600">
