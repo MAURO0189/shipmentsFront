@@ -18,7 +18,7 @@ const HeroSection = () => {
             </p>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
               <Link
-                to="/crear-envio"
+                to="/login"
                 className="bg-white text-blue-700 hover:bg-blue-50 px-6 py-3 rounded-lg font-medium flex items-center justify-center"
               >
                 Crear Envío
