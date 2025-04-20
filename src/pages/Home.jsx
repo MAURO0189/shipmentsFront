@@ -5,6 +5,7 @@ import ServicesSection from "../components/ServicesSection";
 import StatsSection from "../components/StatsSection";
 import TestimonialsSection from "../components/TestimonialsSection";
 import Footer from "../components/Footer";
+import TrackingHome from "../components/TrackingHome";
 
 const Home = () => {
   return (
@@ -12,6 +13,7 @@ const Home = () => {
       <Header />
       <main className="flex-grow">
         <HeroSection />
+        <TrackingHome />
         <ServicesSection />
         <StatsSection />
         <TestimonialsSection />
