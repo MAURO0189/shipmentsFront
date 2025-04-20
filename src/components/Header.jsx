@@ -42,10 +42,10 @@ const Header = () => {
               Cobertura
             </Link>
             <Link
-              to="/precios"
+              to="/adminLogin"
               className="text-gray-700 hover:text-blue-600 font-medium"
             >
-              Precios
+              Acceso Administrativo
             </Link>
             <Link
               to="/contacto"
