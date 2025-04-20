@@ -13,7 +13,7 @@ const UserHeader = () => {
 
   return (
     <header className="bg-blue-600 text-white px-6 py-4 shadow-md flex justify-between items-center">
-      <h1 className="text-xl font-bold">Mi App de Envíos</h1>
+      <h1 className="text-xl font-bold"> ExpressShip</h1>
       <div className="flex items-center gap-4">
         <span className="text-sm md:text-base">{name}</span>
         <button
