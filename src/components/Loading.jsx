@@ -9,7 +9,7 @@ function Loading() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-      navigate("/homeUser");
+      navigate("/userLayout");
     }, 1000);
 
     return () => clearTimeout(timer);
