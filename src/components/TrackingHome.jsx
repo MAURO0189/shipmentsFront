@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Search, Package } from "lucide-react";
 
-const TrackingSection = () => {
+const TrackingHome = () => {
   const [trackingNumber, setTrackingNumber] = useState("");
 
   const handleTrackingSubmit = (e) => {
@@ -88,4 +88,4 @@ const TrackingSection = () => {
   );
 };
 
-export default TrackingSection;
+export default TrackingHome;
