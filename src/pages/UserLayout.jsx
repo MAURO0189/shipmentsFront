@@ -109,6 +109,10 @@ const UserLayout = () => {
                     <h1 className="text-3xl text-blue-500 font-bold">
                       Bienvenido a Su Panel de Usuario
                     </h1>
+                    <p className="text-gray-600 mt-2 text-lg">
+                      Accede de forma segura a tus datos de envío, configuración
+                      personal y más.
+                    </p>
                   </div>
                 }
               />
